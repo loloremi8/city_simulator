@@ -1,0 +1,42 @@
+import pygame
+from economy import can_afford_zone, pay_for_zone
+
+grid_size = 80
+
+def initialize_grid():
+    grid = [[0 for _ in range(grid_size)] for _ in range(grid_size)]
+    return grid
+
+# Funkce pro umístìní zóny po kliknutí
+def place_zone(grid, pos, selected_zone, cell_size, ui_height, offset_x, offset_y):
+    # Adjust click position by subtracting the offsets
+    adjusted_x = pos[0] - offset_x
+    adjusted_y = pos[1] - offset_y - ui_height
+
+    # Calculate the column and row based on the adjusted click position
+    col = adjusted_x // cell_size
+    row = adjusted_y // cell_size
+
+    # Zkontroluj, zda kliknutí není mimo møížku
+    if 0 <= col < grid_size and 0 <= row < grid_size:
+        if grid[row][col] == 0:  # Zóna se mùže umístit jen na prázdné pole
+            if can_afford_zone(selected_zone):  # Zkontroluj finance
+                grid[row][col] = selected_zone  # Polož zónu
+                pay_for_zone(selected_zone)     # Strhni náklady
+                return True
+    return False
+
+colors = {
+    0: (255, 255, 255),        # Prázdná buòka
+    1: (0, 255, 0),      # Obytná zóna (Green)
+    2: (128, 128, 128),  # Prùmyslová zóna (Gray)
+    3: (255, 0, 0)       # Silnice (Red)
+}
+
+# Funkce pro vykreslení møížky
+def draw_grid(screen, grid, cell_size, ui_height, offset_x, offset_y):
+    for y, row in enumerate(grid):
+        for x, cell in enumerate(row):
+            rect = pygame.Rect(x * cell_size + offset_x, y * cell_size + offset_y + ui_height, cell_size, cell_size)
+            color = colors[cell]
+            pygame.draw.rect(screen, color, rect)

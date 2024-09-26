@@ -1,0 +1,115 @@
+import pygame
+import json
+from grid import initialize_grid, place_zone, draw_grid
+from economy import get_player_money, get_player_resources, set_player_money, set_player_resources, generate_income
+from ui import draw_ui, handle_zone_selection
+
+# Funkce pro uložení hry
+def save_game(grid, player_money, player_resources, file_name="savegame.json"):
+    game_state = {
+        "grid": grid,
+        "player_money": player_money,
+        "player_resources": player_resources
+    }
+    with open(file_name, 'w') as save_file:
+        json.dump(game_state, save_file)
+    print("Game saved successfully!")
+
+# Funkce pro naètení hry
+def load_game(file_name="savegame.json"):
+    with open(file_name, 'r') as load_file:
+        game_state = json.load(load_file)
+    print("Game loaded successfully!")
+    return game_state["grid"], game_state["player_money"], game_state["player_resources"]
+
+# Inicializace Pygame
+pygame.init()
+
+# Nastavení základního okna
+window_width, window_height = 1366, 705
+ui_height = 80
+screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)  # Použij resizable window
+
+clock = pygame.time.Clock()
+
+# Inicializace hry
+grid_size = window_height = ui_height  # Velikost møížky
+grid = initialize_grid()
+selected_zone = None
+
+auto_save_interval = 300000  # 5 minut (v milisekundách)
+auto_save_timer = pygame.time.get_ticks()
+
+# Inicializace fontu
+font = pygame.font.Font(None, 36)
+
+# Výchozí zóna pro umístìní
+selected_zone = 1
+
+# Èasovaè pro generování pøíjmù
+income_timer = pygame.time.get_ticks()
+
+# Hlavní smyèka
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+        # Zmìna zóny na základì kláves
+        new_zone = handle_zone_selection(event)
+        if new_zone:
+            selected_zone = new_zone
+
+        # Umístìní zóny kliknutím
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            if pos[1] >= ui_height:  # Kliknutí musí být pod UI
+                place_zone(grid, pos, selected_zone, cell_size, ui_height, offset_x, offset_y)
+
+        # Uložení hry
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:  # Uložit hru pøi stisknutí klávesy S
+                save_game(grid, get_player_money(), get_player_resources())
+            elif event.key == pygame.K_l:  # Naèíst hru pøi stisknutí klávesy L
+                grid, player_money, player_resources = load_game()
+                set_player_money(player_money)
+                set_player_resources(player_resources)
+
+    # Generování pøíjmù (každé 2 sekundy)
+    current_time = pygame.time.get_ticks()
+    if current_time - income_timer >= 2000:  # 2 sekundy
+        generate_income(grid)
+        income_timer = current_time
+
+    # Získání aktuální velikosti okna
+    window_width, window_height = pygame.display.get_surface().get_size()
+
+    # Výpoèet velikosti buòky na základì minimální dimenze dostupné plochy
+    available_width = window_width
+    available_height = window_height - ui_height
+
+    # Použij menší z hodnot, aby buòka byla ètvercová
+    cell_size = min(available_width // grid_size, available_height // grid_size)
+
+    # Výpoèet odsazení pro zarovnání møížky na støed
+    total_grid_width = cell_size * grid_size
+    total_grid_height = cell_size * grid_size
+
+    offset_x = (available_width - total_grid_width) // 2
+    offset_y = (available_height - total_grid_height) // 2
+
+    # Vyèištìní obrazovky
+    screen.fill((0, 0, 0))  # Bílé pozadí pro prázdné buòky
+
+    # Vykresli møížku s aktualizovaným cell_size
+    draw_grid(screen, grid, cell_size, ui_height, offset_x, offset_y)
+
+    # Vykreslení UI nahoøe
+    draw_ui(screen, get_player_money(), get_player_resources(), selected_zone, font, grid, ui_height)
+
+    # Aktualizace obrazovky
+    pygame.display.flip()
+    clock.tick(60)  # Zrychlené vykreslování pro viditelnìjší ekonomické zmìny
+
+pygame.quit()

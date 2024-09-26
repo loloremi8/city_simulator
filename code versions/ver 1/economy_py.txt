@@ -1,0 +1,84 @@
+# Inicializace hráèovy ekonomiky
+_money = 1000
+_resources = 1000
+
+# Funkce pro získání aktuálních penìz
+def get_player_money():
+    return _money
+
+# Funkce pro získání aktuálních surovin
+def get_player_resources():
+    return _resources
+
+# Funkce pro nastavení penìz
+def set_player_money(amount):
+    global _money
+    _money = amount
+
+# Funkce pro nastavení surovin
+def set_player_resources(amount):
+    global _resources
+    _resources = amount
+
+# Náklady na jednotlivé zóny
+zone_costs = {
+    1: {"money": 50, "resources": 20},  # Obytná zóna
+    2: {"money": 100, "resources": 50},  # Prùmyslová zóna
+    3: {"money": 20, "resources": 10}   # Silnice
+}
+
+# Pøíjem z jednotlivých zón
+zone_income = {
+    1: {"money": 5, "resources": 2},  # Obytná zóna
+    2: {"money": 10, "resources": 5},  # Prùmyslová zóna
+    3: {"money": 0, "resources": 0}    # Silnice
+}
+
+# Kontrola, jestli hráè má dostatek penìz a surovin
+def can_afford_zone(zone_type):
+    return get_player_money() >= zone_costs[zone_type]["money"] and \
+           get_player_resources() >= zone_costs[zone_type]["resources"]
+
+# Strhnutí nákladù na zónu
+def pay_for_zone(zone_type):
+    set_player_money(get_player_money() - zone_costs[zone_type]["money"])
+    set_player_resources(get_player_resources() - zone_costs[zone_type]["resources"])
+
+# Generování pøíjmù
+def generate_income(grid):
+    money = get_player_money()
+    resources = get_player_resources()
+    for row in grid:
+        for cell in row:
+            if cell in zone_income:
+                money += zone_income[cell]["money"]
+                resources += zone_income[cell]["resources"]
+    set_player_money(money)
+    set_player_resources(resources)
+
+# Definice pøíjmu penìz
+def get_money_income(grid):
+    total_income = 0
+    for row in grid:
+        for cell in row:
+            if cell in zone_income:
+                total_income += zone_income[cell]["money"]
+    return total_income
+
+# Definice pøíjmu surovin
+def get_resource_income(grid):
+    total_resources_income = 0
+    for row in grid:
+        for cell in row:
+            if cell in zone_income:
+                total_resources_income += zone_income[cell]["resources"]
+    return total_resources_income
+
+# Funkce pro zkrácení èísel na formát X.Xk, X.XM apod.
+def format_number(value):
+    if value >= 1_000_000:
+        return f"{value / 1_000_000:.1f}M"  # Zobrazení v milionech
+    elif value >= 10_000:
+        return f"{value / 1_000:.1f}k"      # Zobrazení v deseti tisících
+    else:
+        return str(value)  # Zobrazení normálnì, pokud je ménì než 1000
