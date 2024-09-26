@@ -1,0 +1,41 @@
+# Do not ignore these specific folders and files
+
+!.gitignore
+
+!icons/
+
+!*.py
+
+!README.md
+
+!savegame.json
+
+!main.spec
+
+
+!main.exe
+
+# Ignore specific folders
+
+.vscode/
+
+__pycache__/
+
+build/
+
+code versions/
+
+
+
+# Ignore specific files
+
+Game checklist.txt
+
+
+
+
+# Ignore Mac and Windows system files (optional, but recommended)
+
+.DS_Store
+
+Thumbs.db
