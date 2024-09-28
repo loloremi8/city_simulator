@@ -1,6 +1,6 @@
 import pygame
-from economy import generate_income, get_money_income, get_resource_income, format_number
-from needs import get_total_power_generation, get_total_water_generation, get_total_power_needs, get_total_water_needs
+from economy import get_money_income, get_resource_income, format_number
+from needs import get_total_power_generation, get_total_water_generation, get_total_power_needs, get_total_water_needs, water_operating_costs, power_operating_costs
 
 
 
@@ -50,13 +50,23 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid,
     # Power Icon and Tier (use yellow for selected)
     draw_icon(screen, "icons/power.png", start_x + 690, 6)  # Power icon
     power_zone_text = font.render(f"T{selected_tiers[3]}", True, (255, 255, 0) if selected_zone == 4 else (255, 255, 255))  # Yellow for Power if selected
-    screen.blit(power_zone_text, (start_x + 690 + 40, 10))  # Show power zone tier
+    screen.blit(power_zone_text, (start_x + 690 + 40 + 5, 10))  # Show power zone tier
 
     # Water Icon and Tier (use blue for selected)
     draw_icon(screen, "icons/water.png", start_x + 780, 6)  # Water icon
     water_zone_text = font.render(f"T{selected_tiers[4]}", True, (0, 0, 255) if selected_zone == 5 else (255, 255, 255))  # Blue for Water if selected
-    screen.blit(water_zone_text, (start_x + 780 + 40, 10))  # Show water zone tier
+    screen.blit(water_zone_text, (start_x + 780 + 40 + 5, 10))  # Show water zone tier
 
+    # Check if production meets demand, display warning icon if not
+    total_power_gen = get_total_power_generation(grid)
+    total_power_need = get_total_power_needs(grid)
+    total_water_gen = get_total_water_generation(grid)
+    total_water_need = get_total_water_needs(grid)
+
+    if total_power_gen < total_power_need:
+        draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power shortage
+    if total_water_gen < total_water_need:
+        draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water shortage
 
 # Cycle through zone tiers using keys
 def handle_zone_selection(event, selected_zone, selected_tiers):
@@ -110,6 +120,15 @@ def draw_statistics_ui(screen, font, ui_height, grid):
     total_water_need = get_total_water_needs(grid)
     water_text = font.render(f"Water: Generated = {total_water_gen}, Needed = {total_water_need}", True, (255, 255, 255))
 
+    # Operating costs calculation
+    power_costs = sum(power_operating_costs[tier] for row in grid for zone_type, tier in row if zone_type == 4)
+    water_costs = sum(water_operating_costs[tier] for row in grid for zone_type, tier in row if zone_type == 5)
+    costs_text = font.render(f"Operating Costs: Power = {power_costs}, Water = {water_costs}", True, (255, 255, 255))
+
+    # Warning icon if insufficient power or water
+    if total_power_gen < total_power_need or total_water_gen < total_water_need:
+        draw_icon(screen, "icons/warning.png", width - 50, ui_height + 20)  # Red warning icon
+
     # Render these texts in the statistics window
     screen.blit(title_text, (width // 2 - title_text.get_width() // 2, ui_height + 50))
     screen.blit(tax_text, (50, ui_height + 100))    # Tax statistics
@@ -117,3 +136,4 @@ def draw_statistics_ui(screen, font, ui_height, grid):
     screen.blit(loan_text, (50, ui_height + 200))   # Loan statistics
     screen.blit(power_text, (50, ui_height + 250))  # Power statistics
     screen.blit(water_text, (50, ui_height + 300))  # Water statistics
+    screen.blit(costs_text, (50, ui_height + 350))  # Operating costs

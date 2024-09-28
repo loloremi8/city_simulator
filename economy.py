@@ -64,6 +64,16 @@ zone_income = {
     },
     3: {  # Road (no income)
         1: {"money": 0, "resources": 0}
+    },
+    4: {  # Power Zone
+        1: {"generation": 20},  # Tier 1
+        2: {"generation": 50},  # Tier 2
+        3: {"generation": 100}  # Tier 3
+    },
+    5: {  # Water Zone
+        1: {"generation": 20},  # Tier 1
+        2: {"generation": 50},  # Tier 2
+        3: {"generation": 100}  # Tier 3
     }
 }
 
@@ -89,34 +99,58 @@ def generate_income(grid):
     resources = get_player_resources()
     total_power_gen = 0
     total_water_gen = 0
-    
+
+    # Define a helper function for operational cost deduction
+    def deduct_cost(zone_type, tier, money):
+        if zone_type == 4:  # Power zone
+            cost = power_operating_costs.get(tier, 0)
+            money -= cost
+        elif zone_type == 5:  # Water zone
+            cost = water_operating_costs.get(tier, 0)
+            money -= cost
+        return money
+
+    # Loop through grid and process income and costs
     for row in grid:
         for zone_type, tier in row:
-            if zone_type in zone_income:
-                # Handle Residential and Industrial zones income
-                if zone_type in [1, 2]:  # Residential or Industrial
-                    money += zone_income[zone_type][tier]["money"]
-                    resources += zone_income[zone_type][tier]["resources"]
-                
-                # Handle Power Plants: Deduct operational costs
-                elif zone_type == 4:  # Power zone
-                    total_power_gen += zone_income[zone_type][tier]["power"]
-                    cost = power_operating_costs.get(tier, 0)
-                    money -= cost  # Deduct operating costs for power plants
-                    print(f"Power Plant Tier {tier}: Deducting {cost} money")
+            if zone_type in [1, 2]:  # Residential or Industrial zones
+                money += zone_income[zone_type][tier]["money"]
+                resources += zone_income[zone_type][tier]["resources"]
+            elif zone_type == 4:  # Power zone
+                total_power_gen += zone_income[zone_type][tier]["generation"]  # Corrected to 'generation'
+            elif zone_type == 5:  # Water zone
+                total_water_gen += zone_income[zone_type][tier]["generation"]  # Corrected to 'generation'
 
-                # Handle Water Plants: Deduct operational costs
-                elif zone_type == 5:  # Water zone
-                    total_water_gen += zone_income[zone_type][tier]["water"]
-                    cost = water_operating_costs.get(tier, 0)
-                    money -= cost  # Deduct operating costs for water plants
-                    print(f"Water Plant Tier {tier}: Deducting {cost} money")
+            # Deduct operational cost for power/water zones
+            if zone_type in [4, 5]:
+                money = deduct_cost(zone_type, tier, money)
 
     # Update player money and resources
     set_player_money(money)
     set_player_resources(resources)
 
     return total_power_gen, total_water_gen  # Return total production
+
+
+
+# Function to deduct operational costs for power and water zones
+def deduct_operational_costs(grid):
+    money = get_player_money()  # Get current money
+
+    for row in grid:
+        for zone_type, tier in row:
+            # Handle operational costs for power plants
+            if zone_type == 4:  # Power zone
+                cost = power_operating_costs.get(tier, 0)
+                money -= cost  # Deduct operating cost for power plant
+
+            # Handle operational costs for water plants
+            elif zone_type == 5:  # Water zone
+                cost = water_operating_costs.get(tier, 0)
+                money -= cost  # Deduct operating cost for water plant
+
+    # Update player money
+    set_player_money(money)
 
 
 

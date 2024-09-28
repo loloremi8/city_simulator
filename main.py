@@ -1,7 +1,7 @@
 import pygame
 import json
 from grid import initialize_grid, place_zone, draw_grid
-from economy import get_player_money, get_player_resources, set_player_money, set_player_resources, generate_income
+from economy import get_player_money, get_player_resources, set_player_money, set_player_resources, generate_income, deduct_operational_costs
 from ui import draw_ui, draw_statistics_ui, handle_zone_selection
 
 
@@ -36,7 +36,15 @@ window_width, window_height = 1366, 705
 ui_height = 50
 screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
 
+# Initialze the clock
 clock = pygame.time.Clock()
+
+# Separate timer for income generation
+income_timer = pygame.time.get_ticks()
+
+# Timer for cost deduction (8 seconds)
+deduction_timer = pygame.time.get_ticks()
+deduction_interval = 8000  # 8 seconds
 
 # Game initialization
 grid_size = 150  # Map is 200x200 now
@@ -73,6 +81,7 @@ show_statistics = False
 # Main game loop
 running = True
 while running:
+    current_time = pygame.time.get_ticks()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -122,10 +131,14 @@ while running:
         last_mouse_pos = current_mouse_pos
 
     # Generate income every 2 seconds
-    current_time = pygame.time.get_ticks()
-    if current_time - income_timer >= 2000:  # Every 2 seconds
-        total_power_gen, total_water_gen = generate_income(grid)
+    if current_time - income_timer >= 2000: # Every 2 seconds
+        generate_income(grid)
         income_timer = current_time
+
+    # Timer for deducting operational costs (every 8 seconds)
+    if current_time - deduction_timer >= deduction_interval:  # Every 8 seconds
+        deduct_operational_costs(grid)  # Function to deduct costs (we will implement this)
+        deduction_timer = current_time
 
     # Get current window size
     window_width, window_height = pygame.display.get_surface().get_size()

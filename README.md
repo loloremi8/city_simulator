@@ -18,6 +18,7 @@ Future and completed plans for the game:
 - [] Multiple maps for a player
 - [] Game progress (tiers, unlocking new zones)
 - [] New Ui ("menu" type selection zone)
+- [] Re-work the economy system (balance prices/costs to make it playable)
 - [] Better graphics and animations ???
 
 Now working on: Needs (check production, warnings, costs of operation, reach line/pipe system)
