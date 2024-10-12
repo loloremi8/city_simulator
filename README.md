@@ -13,15 +13,16 @@ Future and completed plans for the game:
 - [x] Re-work the map system.
 - [x] Create the system of needs.
 - [x] Ui optimalization (show statistics, rework the ui).
-- [] Needs (check production, warnings, costs of operation, reach line/pipe system)
+- [x] Needs (check production, warnings, costs of operation, reach line/pipe system).
+- [] Saving/Loading both layers of the map.
 - [] Re-work the economy system (taxes-productivity/happines, loan-repayment system, costs-incresing prices for new zones).
-- [] Multiple maps for a player
-- [] Game progress (tiers, unlocking new zones)
-- [] New Ui ("menu" type selection zone)
-- [] Re-work the economy system (balance prices/costs to make it playable)
+- [] Multiple maps for a player.
+- [] Game progress (tiers, unlocking new zones).
+- [] New Ui ("menu" type selection zone).
+- [] Re-work the economy system (balance prices/costs to make it playable).
 - [] Better graphics and animations ???
 
-Now working on: Needs (check production, warnings, costs of operation, reach line/pipe system)
+Now working on: Saving/Loading both layers of the map.
   
 **Key actions:**
 
