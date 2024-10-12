@@ -68,22 +68,49 @@ def get_total_water_generation(grid):
 
 
 
-# Calculate total power needs (Residential and Industrial Zones)
-def get_total_power_needs(grid):
+# Helper function to check if a zone is connected to the specified infrastructure
+def is_connected_to_infrastructure(row, col, infrastructure_type, underground_level, grid_size, radius=4):
+    # Check a radius around the zone to see if it's connected to the specified infrastructure
+    for r in range(max(0, row - radius), min(grid_size, row + radius + 1)):
+        for c in range(max(0, col - radius), min(grid_size, col + radius + 1)):
+            if underground_level[r][c] == infrastructure_type:
+                return True
+    return False
+
+
+
+# Calculate total power needs (Residential and Industrial Zones) and check connectivity
+def get_total_power_needs(above_ground_level, underground_level, grid_size):
     total_power_needs = 0
-    for row in grid:
-        for zone_type, tier in row:
+    for row in range(grid_size):
+        for col in range(grid_size):
+            zone_type, tier = above_ground_level[row][col]
+
+            # Check if the zone requires power
             if zone_type in zone_power_water_needs:
-                total_power_needs += zone_power_water_needs[zone_type][tier]["power"]
+                power_needed = zone_power_water_needs[zone_type][tier]["power"]
+
+                # Check if the zone is connected to power infrastructure
+                if is_connected_to_infrastructure(row, col, 'power_line', underground_level, grid_size):
+                    total_power_needs += power_needed
+
     return total_power_needs
 
 
 
-# Calculate total water needs (Residential and Industrial Zones)
-def get_total_water_needs(grid):
+# Calculate total water needs (Residential and Industrial Zones) and check connectivity
+def get_total_water_needs(above_ground_level, underground_level, grid_size):
     total_water_needs = 0
-    for row in grid:
-        for zone_type, tier in row:
+    for row in range(grid_size):
+        for col in range(grid_size):
+            zone_type, tier = above_ground_level[row][col]
+
+            # Check if the zone requires water
             if zone_type in zone_power_water_needs:
-                total_water_needs += zone_power_water_needs[zone_type][tier]["water"]
+                water_needed = zone_power_water_needs[zone_type][tier]["water"]
+
+                # Check if the zone is connected to water infrastructure
+                if is_connected_to_infrastructure(row, col, 'water_pipe', underground_level, grid_size):
+                    total_water_needs += water_needed
+
     return total_water_needs

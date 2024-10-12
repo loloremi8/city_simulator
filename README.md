@@ -1,5 +1,5 @@
 # city-simulator
-Fun project to create a simple city simulator game in Python. The project idea went from a simulation, where it was randomizedhow the city would grow to a simulator/game. It is my first game project in Python using Pygame.
+Fun project to create a simple city simulator game in Python. The project idea went from a simulation, where it was randomized how the city would grow to a simulator/game. It is my first game project in Python using Pygame.
 
 ## How to play the game:
 
