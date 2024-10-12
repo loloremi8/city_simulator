@@ -3,7 +3,9 @@ Fun project to create a simple city simulator game in Python. The project idea w
 
 ## How to play the game:
 
-For now there is no in-game help, so everything will be written here. At this moment you **CANNOT** fail or bankrupt in this game, since there are no such mechanincs to allow you to do so. You can only gain money and resources.
+For now there is no in-game help, so everything will be written here. The economy system is not balanced yet, but now you can lose money, since the adding of the infrastructure costs.
+
+To make lines and pipes conected to buildings or power houses make sure they are in 4-block radius.
 
 Future and completed plans for the game:
 
@@ -30,7 +32,7 @@ T - Opens/Closes statistic menu.
 
 S/L - Save/Load the game file.
 
-1/2/3/4/5 - Chooses zones (Residential/Industrail/Road/Power/Water).
+1/2/3/4/5/6/7 - Chooses zones (Residential/Industrail/Road/Power/Water/Power lines/Water pipes).
 
 Arrow keys Up/Down - Chooses tiers of zones (Only for Residential/Industial/Power/Water).
 
@@ -80,6 +82,14 @@ Tier 2: Money: 300, Resources: 150,
 
 Tier 3: Money: 450, Resources: 225.
 
+*Power line*
+
+Money: 10, Resources: 5.
+
+*Water pipes*
+
+Money: 8, Resources: 4.
+
 **Zone incomes:**
 
 *Residential Zone*
@@ -117,6 +127,14 @@ Tier 1: Generation: 20,
 Tier 2: Generation: 50,
 
 Tier 3: Generation: 100.
+
+*Power lines*
+
+No income
+
+*Water pipes*
+
+No income
 
 **Zone power and water needs:**
 
