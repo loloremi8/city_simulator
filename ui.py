@@ -13,7 +13,7 @@ def draw_icon(screen, icon_path, x, y):
 
 
 # Draw the compact UI with icons for money, resources, and income
-def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid, ui_height):
+def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid, ui_height, above_ground_level, underground_level, grid_size):
     # Set a box background for the row UI
     pygame.draw.rect(screen, (50, 50, 50), (0, 0, screen.get_width(), ui_height))
 
@@ -57,31 +57,54 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid,
     water_zone_text = font.render(f"T{selected_tiers[4]}", True, (0, 0, 255) if selected_zone == 5 else (255, 255, 255))  # Blue for Water if selected
     screen.blit(water_zone_text, (start_x + 780 + 40 + 5, 10))  # Show water zone tier
 
+    # Power lines
+    draw_icon(screen, "icons/power_lines.png", start_x + 880, 6)  # Powe line icon
+    power_line_text = font.render(f"P", True, (255, 255, 0) if selected_zone == 6 else (255, 255, 255))  # Yellow "P" if power lines are selected
+    screen.blit(power_line_text, (start_x + 880 + 40 + 5, 10))  # Show power lines text
+
+    # Pipe lines
+    draw_icon(screen, "icons/pipe_lines.png", start_x + 970, 6)  # Pipe line icon
+    pipe_line_text = font.render(f"P", True, (0, 0, 255) if selected_zone == 7 else (255, 255, 255))  # Blue "P" if pipe lines are selected
+    screen.blit(pipe_line_text, (start_x + 970 + 40 + 5, 10))  # Show pipe line text
+
     # Check if production meets demand, display warning icon if not
     total_power_gen = get_total_power_generation(grid)
-    total_power_need = get_total_power_needs(grid)
+    total_power_need = get_total_power_needs(above_ground_level, underground_level, grid_size)
     total_water_gen = get_total_water_generation(grid)
-    total_water_need = get_total_water_needs(grid)
+    total_water_need = get_total_water_needs(above_ground_level, underground_level, grid_size)
 
     if total_power_gen < total_power_need:
         draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power shortage
     if total_water_gen < total_water_need:
         draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water shortage
 
+
+
 # Cycle through zone tiers using keys
-def handle_zone_selection(event, selected_zone, selected_tiers):
+def handle_zone_selection(event, selected_zone, selected_tiers, is_undergroung_mode):
     # Handle zone selection
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_1:
             selected_zone = 1  # Residential zone
+            is_undergroung_mode = False
         elif event.key == pygame.K_2:
             selected_zone = 2  # Industrial zone
+            is_undergroung_mode = False
         elif event.key == pygame.K_3:
             selected_zone = 3  # Road (no tier changes)
+            is_undergroung_mode = False
         elif event.key == pygame.K_4:
             selected_zone = 4  # Power
+            is_undergroung_mode = False
         elif event.key == pygame.K_5:
             selected_zone = 5  # Water
+            is_undergroung_mode = False
+        elif event.key == pygame.K_6:
+            selected_zone = 6  # Power lines
+            is_undergroung_mode = True
+        elif event.key == pygame.K_7:
+            selected_zone = 7  # Pipe lines
+            is_undergroung_mode = True
 
         # Handle tier cycling for Residential and Industrial zones (using up/down arrow keys)
         if selected_zone in [1, 2, 4, 5]:  # Only allow tier changes for Residential (1), Industrial (2), Water (4) and Power (5)
@@ -91,12 +114,12 @@ def handle_zone_selection(event, selected_zone, selected_tiers):
             elif event.key == pygame.K_DOWN:  # Decrease tier for the selected zone
                 selected_tiers[selected_zone - 1] = max(selected_tiers[selected_zone - 1] - 1, 1)  # Min 1 tier
     
-    return selected_zone, selected_tiers
+    return selected_zone, selected_tiers, is_undergroung_mode
 
 
 
 # Statistics window remains unchanged from before
-def draw_statistics_ui(screen, font, ui_height, grid):
+def draw_statistics_ui(screen, font, ui_height, grid, above_ground_level, underground_level, grid_size):
     width, height = screen.get_size()
 
     # Create a semi-transparent overlay for the statistics window
@@ -113,11 +136,11 @@ def draw_statistics_ui(screen, font, ui_height, grid):
 
     # Power and Water statistics from needs.py
     total_power_gen = get_total_power_generation(grid)
-    total_power_need = get_total_power_needs(grid)
+    total_power_need = get_total_power_needs(above_ground_level, underground_level, grid_size)
     power_text = font.render(f"Power: Generated = {total_power_gen}, Needed = {total_power_need}", True, (255, 255, 255))
 
     total_water_gen = get_total_water_generation(grid)
-    total_water_need = get_total_water_needs(grid)
+    total_water_need = get_total_water_needs(above_ground_level, underground_level, grid_size)
     water_text = font.render(f"Water: Generated = {total_water_gen}, Needed = {total_water_need}", True, (255, 255, 255))
 
     # Operating costs calculation

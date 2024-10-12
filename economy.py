@@ -1,8 +1,8 @@
 from needs import water_operating_costs, power_operating_costs
 
 # Economy initialization
-_money = 1000
-_resources = 1000
+_money = 10000
+_resources = 10000
 
 # Function to get the current money
 def get_player_money():
@@ -48,7 +48,19 @@ zone_costs = {
         1: {"money": 150, "resources": 75},   # Tier 1
         2: {"money": 300, "resources": 150},  # Tier 2
         3: {"money": 450, "resources": 225},  # Tier 3
+    },
+    6: {  # Powe lines
+        1: {"money": 10, "resources": 5}
+    },
+    7: {  # Pipe lines
+        1: {"money": 8, "resources": 4}
     }
+}
+
+# Add costs for power lines and water pipes
+infrastructure_costs = {
+    'power_line': {"money": 10, "resources": 5},  # Cost to place a power line
+    'water_pipe': {"money": 8, "resources": 4}   # Cost to place a water pipe
 }
 
 zone_income = {
@@ -80,16 +92,27 @@ zone_income = {
 
 
 # Function to check if the player can afford a zone of a specific tier
-def can_afford_zone(zone_type, tier):
-    return get_player_money() >= zone_costs[zone_type][tier]["money"] and \
-           get_player_resources() >= zone_costs[zone_type][tier]["resources"]
+def can_afford_zone(zone_type, tier=None):
+    # Check if it's a zone or infrastructure
+    if zone_type in infrastructure_costs:  # Infrastructure
+        cost = infrastructure_costs[zone_type]
+    else:  # Zones
+        cost = zone_costs[zone_type][tier]
+    
+    return get_player_money() >= cost["money"] and get_player_resources() >= cost["resources"]
 
 
 
 # Deduct the cost of the zone
-def pay_for_zone(zone_type, tier):
-    set_player_money(get_player_money() - zone_costs[zone_type][tier]["money"])
-    set_player_resources(get_player_resources() - zone_costs[zone_type][tier]["resources"])
+def pay_for_zone(zone_type, tier=None):
+    # Check if it's a zone or infrastructure
+    if zone_type in infrastructure_costs:  # Infrastructure
+        cost = infrastructure_costs[zone_type]
+    else:  # Zones
+        cost = zone_costs[zone_type][tier]
+    
+    set_player_money(get_player_money() - cost["money"])
+    set_player_resources(get_player_resources() - cost["resources"])
 
 
 
