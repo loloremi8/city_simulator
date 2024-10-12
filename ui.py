@@ -1,4 +1,5 @@
 import pygame
+from grid import is_zone_connected
 from economy import get_money_income, get_resource_income, format_number
 from needs import get_total_power_generation, get_total_water_generation, get_total_power_needs, get_total_water_needs, water_operating_costs, power_operating_costs
 
@@ -77,6 +78,20 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid,
         draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power shortage
     if total_water_gen < total_water_need:
         draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water shortage
+
+    # Check for connection status for power and water, and display warnings
+    for row in range(grid_size):
+        for col in range(grid_size):
+            zone_type, tier = above_ground_level[row][col]
+            if zone_type == 1 or zone_type == 2:  # Residential or Industrial zones
+                connected_to_power = is_zone_connected(above_ground_level, underground_level, row, col, 'power')
+                connected_to_water = is_zone_connected(above_ground_level, underground_level, row, col, 'water')
+
+                # Show warning icons if not connected to power or water
+                if not connected_to_power:
+                    draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power shortage
+                if not connected_to_water:
+                    draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water shortage
 
 
 

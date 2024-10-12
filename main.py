@@ -1,6 +1,6 @@
 import pygame
 import json
-from grid import initialize_grid, place_zone, draw_grid, place_infrastructure, draw_infrastructure, is_zone_connected
+from grid import initialize_grid, place_zone, draw_grid, place_infrastructure, draw_infrastructure, is_zone_connected, colours, colours_transparent
 from economy import get_player_money, get_player_resources, set_player_money, set_player_resources, generate_income, deduct_operational_costs
 from ui import draw_ui, draw_statistics_ui, handle_zone_selection
 
@@ -176,15 +176,14 @@ while running:
 
     # If underground mode is active
     if is_underground_mode:
-        # Draw the semi-transparent above-ground grid
-        draw_grid(screen, above_ground_level, cell_size, ui_height, offset_x, offset_y, is_underground_mode=True)
+        # Draw the above-ground layer with transparency when underground mode is active
+        draw_grid(screen, above_ground_level, cell_size, ui_height, offset_x, offset_y, colours_transparent)
         # Draw the underground layer (pipes and power lines)
         draw_infrastructure(screen, underground_level, cell_size, ui_height, offset_x, offset_y)
-
-    # If normal above-ground mode is active
     else:
-        # Draw the normal above-ground grid (without transparency)
-        draw_grid(screen, above_ground_level, cell_size, ui_height, offset_x, offset_y, is_underground_mode=False)
+        # Draw the normal above-ground layer
+        draw_grid(screen, above_ground_level, cell_size, ui_height, offset_x, offset_y, colours)
+
 
     # Draw the main UI
     draw_ui(screen, get_player_money(), get_player_resources(), selected_zone, selected_tiers, font, grid, ui_height, above_ground_level, underground_level, grid_size)

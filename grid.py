@@ -80,8 +80,8 @@ def place_infrastructure(underground_level, pos, infrastructure_type, cell_size,
 
 
 
-# Adjusted colors for each zone and tier
-colors = {
+# Adjusted colours for each zone and tier
+colours = {
     0: (255, 255, 255, 255),      # White for empty cells
     1: {  # Residential Zone
         1: (64, 228, 32, 255),    # Light Green (Tier 1)
@@ -110,55 +110,71 @@ colors = {
 
 
 
+# Semi-transparent colours for underground mode
+colours_transparent = {
+    0: (255, 255, 255, 255),      # Semi-transparent white for empty cells
+    1: {  # Residential Zone
+        1: (64, 228, 32, 128),    # Light Green (Tier 1, semi-transparent)
+        2: (50, 205, 50, 128),    # Medium Green (Tier 2, semi-transparent)
+        3: (0, 128, 0, 128)       # Dark Green (Tier 3, semi-transparent)
+    },
+    2: {  # Industrial Zone
+        1: (192, 192, 192, 128),  # Light Gray (Tier 1, semi-transparent)
+        2: (128, 128, 128, 128),  # Medium Gray (Tier 2, semi-transparent)
+        3: (64, 64, 64, 128)      # Dark Gray (Tier 3, semi-transparent)
+    },
+    3: {  # Road (no tier distinctions)
+        1: (255, 0, 0, 128)       # Red for Roads (semi-transparent)
+    },
+    4: {  # Power Zone
+        1: (255, 255, 102, 128),   # Light Yellow (Tier 1, semi-transparent)
+        2: (255, 255, 0, 128),     # Medium Yellow (Tier 2, semi-transparent)
+        3: (204, 204, 0, 128)      # Dark Yellow (Tier 3, semi-transparent)
+    },
+    5: {  # Water Zone
+        1: (102, 178, 255, 128),   # Light Blue (Tier 1, semi-transparent)
+        2: (51, 153, 255, 128),    # Medium Blue (Tier 2, semi-transparent)
+        3: (0, 102, 204, 128)      # Dark Blue (Tier 3, semi-transparent)
+    }
+}
+
+
+
 # Draw the grid with different shades based on the tier
-def draw_grid(screen, grid, cell_size, ui_height, offset_x, offset_y, is_underground_mode=False):
+def draw_grid(screen, grid, cell_size, ui_height, offset_x, offset_y, colors):
     for y, row in enumerate(grid):
         for x, (zone_type, tier) in enumerate(row):
-            # Check if the cell is empty
-            if zone_type == 0:
-                color = colors[0]  # Use white for empty cells
-            else:
-                color = colors[zone_type][tier]
+            # Get the color for the current zone type and tier
+            color = colors[zone_type][tier] if zone_type != 0 else colors[0]
 
-            # If in underground mode, make the above-ground layer semi-transparent
-            if is_underground_mode:
-                # Create a temporary surface with transparency (SRCALPHA flag)
-                temp_surface = pygame.Surface((cell_size, cell_size), pygame.SRCALPHA)
-
-                # Adjust color to make it semi-transparent (alpha 128)
-                semi_transparent_color = (*color[:3], 128)  # Keep RGB, adjust alpha
-
-                # Fill the temporary surface with the semi-transparent color
-                temp_surface.fill(semi_transparent_color)
-
-                # Draw the semi-transparent cell onto the screen
-                rect = pygame.Rect(x * cell_size + offset_x, y * cell_size + offset_y + ui_height, cell_size, cell_size)
-                screen.blit(temp_surface, rect)
-            else:
-                # Normal mode: draw without transparency
-                rect = pygame.Rect(x * cell_size + offset_x, y * cell_size + offset_y + ui_height, cell_size, cell_size)
-                pygame.draw.rect(screen, color, rect)
-
-            # Draw grid lines (optional)
+            # Create a temporary surface for the grid cell (with transparency)
+            temp_surface = pygame.Surface((cell_size, cell_size), pygame.SRCALPHA)  
+            # Fill the surface with the zone color, including the alpha channel (for transparency)
+            temp_surface.fill(color)
+            # Define the position where this cell should be drawn on the screen
+            rect = pygame.Rect(x * cell_size + offset_x, y * cell_size + offset_y + ui_height, cell_size, cell_size)
+            # Blit the cell (semi-transparent surface) onto the main screen
+            screen.blit(temp_surface, rect)
+            # Optionally draw grid lines (optional, but can be helpful for clarity)
             pygame.draw.rect(screen, (200, 200, 200), rect, 1)
+
 
 
 
 def draw_infrastructure(screen, underground_layer, cell_size, ui_height, offset_x, offset_y):
     for y, row in enumerate(underground_layer):
         for x, infrastructure in enumerate(row):
-            # Create a temporary surface for drawing the underground cell with transparency
-            temp_surface = pygame.Surface((cell_size, cell_size), pygame.SRCALPHA)
-
-            # Fill the temporary surface with white for empty cells or specific colors for lines/pipes
-            if infrastructure is None:
-                temp_surface.fill((255, 255, 255))  # White for empty cells
-            elif infrastructure == 'power_line':
-                temp_surface.fill((255, 255, 0))  # Yellow for power lines
+            # Define colors for infrastructure (e.g., yellow for power lines, blue for water pipes)
+            if infrastructure == 'power_line':
+                color = (255, 255, 0)  # Yellow for power lines
             elif infrastructure == 'water_pipe':
-                temp_surface.fill((0, 0, 255))  # Blue for water pipes
+                color = (0, 0, 255)  # Blue for water pipes
+            else:
+                continue  # Skip if there's no infrastructure
 
-            # Draw the underground cell
+            # Create the rectangle for the current infrastructure cell
             rect = pygame.Rect(x * cell_size + offset_x, y * cell_size + offset_y + ui_height, cell_size, cell_size)
-            screen.blit(temp_surface, rect)  # Blit the surface onto the screen
-            pygame.draw.rect(screen, (200, 200, 200), rect, 1)  # Optional: draw grid lines
+            # Draw the infrastructure directly on the screen
+            pygame.draw.rect(screen, color, rect)
+            # Optionally draw grid lines over the infrastructure
+            pygame.draw.rect(screen, (200, 200, 200), rect, 1)
