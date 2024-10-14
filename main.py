@@ -7,9 +7,10 @@ from ui import draw_ui, draw_statistics_ui, handle_zone_selection
 
 
 # Save the game state
-def save_game(grid, player_money, player_resources, file_name="savegame.json"):
+def save_game(above_ground_level, underground_level, player_money, player_resources, file_name="savegame.json"):
     game_state = {
-        "grid": grid,
+        "above_ground_level": above_ground_level,
+        "underground_level": underground_level,
         "player_money": player_money,
         "player_resources": player_resources
     }
@@ -24,7 +25,7 @@ def load_game(file_name="savegame.json"):
     with open(file_name, 'r') as load_file:
         game_state = json.load(load_file)
     print("Game loaded successfully!")
-    return game_state["grid"], game_state["player_money"], game_state["player_resources"]
+    return game_state["above_ground_level"], game_state["underground_level"], game_state["player_money"], game_state["player_resources"]
 
 
 
@@ -123,11 +124,16 @@ while running:
         if event.type == pygame.KEYDOWN:
             # Save/Load game
             if event.key == pygame.K_s:  # Save game with 'S' key
-                save_game(grid, get_player_money(), get_player_resources())
+                save_game(above_ground_level, underground_level, get_player_money(), get_player_resources())
             elif event.key == pygame.K_l:  # Load game with 'L' key
-                grid, player_money, player_resources = load_game()
+                above_ground_level, underground_level, player_money, player_resources = load_game()
                 set_player_money(player_money)
                 set_player_resources(player_resources)
+
+                # Recalculate income based on loaded game
+                generate_income(above_ground_level)  # Now using above_ground_level instead of grid
+                deduct_operational_costs(above_ground_level)  # Recalculate operational costs
+
             elif event.key == pygame.K_t:  # Toggle statistics window with 'T' key
                 show_statistics = not show_statistics
 
@@ -158,14 +164,14 @@ while running:
         # Update the last mouse position for continuous panning
         last_mouse_pos = current_mouse_pos
 
-    # Generate income every 2 seconds
+    # Generate income every 2 seconds using the above_ground_level
     if current_time - income_timer >= 2000:  # Every 2 seconds
-        generate_income(grid)
+        generate_income(above_ground_level)
         income_timer = current_time
 
-    # Timer for deducting operational costs (every 8 seconds)
+    # Timer for deducting operational costs (every 8 seconds) using the above_ground_level
     if current_time - deduction_timer >= deduction_interval:  # Every 8 seconds
-        deduct_operational_costs(grid)
+        deduct_operational_costs(above_ground_level)
         deduction_timer = current_time
 
     # Get current window size
@@ -185,12 +191,12 @@ while running:
         draw_grid(screen, above_ground_level, cell_size, ui_height, offset_x, offset_y, colours)
 
 
-    # Draw the main UI
-    draw_ui(screen, get_player_money(), get_player_resources(), selected_zone, selected_tiers, font, grid, ui_height, above_ground_level, underground_level, grid_size)
+    # Draw the main UI using the correct grids
+    draw_ui(screen, get_player_money(), get_player_resources(), selected_zone, selected_tiers, font, ui_height, above_ground_level, underground_level, grid_size)
 
-    # Draw the statistics window if toggled on
+    # Draw the statistics window if toggled on using the correct grids
     if show_statistics:
-        draw_statistics_ui(screen, font, ui_height, grid, above_ground_level, underground_level, grid_size)
+        draw_statistics_ui(screen, font, ui_height, above_ground_level, underground_level, grid_size)
 
     # Update the display
     pygame.display.flip()

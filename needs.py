@@ -47,9 +47,9 @@ water_operating_costs = {
 
 
 # Calculate total power generation
-def get_total_power_generation(grid):
+def get_total_power_generation(above_ground_level):
     total_power = 0
-    for row in grid:
+    for row in above_ground_level:
         for zone_type, tier in row:
             if zone_type == 4:  # Power zones
                 total_power += power_generation[zone_type][tier]["generation"]
@@ -58,9 +58,9 @@ def get_total_power_generation(grid):
 
 
 # Calculate total water generation
-def get_total_water_generation(grid):
+def get_total_water_generation(above_ground_level):
     total_water = 0
-    for row in grid:
+    for row in above_ground_level:
         for zone_type, tier in row:
             if zone_type == 5:  # Water zones
                 total_water += water_generation[zone_type][tier]["generation"]

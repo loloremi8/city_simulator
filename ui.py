@@ -14,7 +14,7 @@ def draw_icon(screen, icon_path, x, y):
 
 
 # Draw the compact UI with icons for money, resources, and income
-def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid, ui_height, above_ground_level, underground_level, grid_size):
+def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, ui_height, above_ground_level, underground_level, grid_size):
     # Set a box background for the row UI
     pygame.draw.rect(screen, (50, 50, 50), (0, 0, screen.get_width(), ui_height))
 
@@ -22,13 +22,13 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid,
     start_x = 10  # Initial x position for icons
 
     # Money Icon and Value (including income)
-    money_income = get_money_income(grid)
+    money_income = get_money_income(above_ground_level)  # Use both layers
     draw_icon(screen, "icons/money.png", start_x, 6)  # Money icon
     money_text = font.render(f"{format_number(money)} (+{format_number(money_income)})", True, (255, 255, 255))
     screen.blit(money_text, (start_x + 40, 10))  # Moved text a bit farther from the icon
 
     # Resources Icon and Value (including income)
-    resource_income = get_resource_income(grid)
+    resource_income = get_resource_income(above_ground_level)  # Use both layers
     draw_icon(screen, "icons/resources.png", start_x + 210, 6)  # Resources icon
     resources_text = font.render(f"{format_number(resources)} (+{format_number(resource_income)})", True, (255, 255, 255))
     screen.blit(resources_text, (start_x + 210 + 40, 10))  # Moved text a bit farther from the icon
@@ -59,7 +59,7 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid,
     screen.blit(water_zone_text, (start_x + 780 + 40 + 5, 10))  # Show water zone tier
 
     # Power lines
-    draw_icon(screen, "icons/power_lines.png", start_x + 880, 6)  # Powe line icon
+    draw_icon(screen, "icons/power_lines.png", start_x + 880, 6)  # Power line icon
     power_line_text = font.render(f"P", True, (255, 255, 0) if selected_zone == 6 else (255, 255, 255))  # Yellow "P" if power lines are selected
     screen.blit(power_line_text, (start_x + 880 + 40 + 5, 10))  # Show power lines text
 
@@ -69,9 +69,9 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, grid,
     screen.blit(pipe_line_text, (start_x + 970 + 40 + 5, 10))  # Show pipe line text
 
     # Check if production meets demand, display warning icon if not
-    total_power_gen = get_total_power_generation(grid)
+    total_power_gen = get_total_power_generation(above_ground_level)  # Use above ground layer for power plants
     total_power_need = get_total_power_needs(above_ground_level, underground_level, grid_size)
-    total_water_gen = get_total_water_generation(grid)
+    total_water_gen = get_total_water_generation(above_ground_level)  # Use above ground layer for water plants
     total_water_need = get_total_water_needs(above_ground_level, underground_level, grid_size)
 
     if total_power_gen < total_power_need:
@@ -134,7 +134,7 @@ def handle_zone_selection(event, selected_zone, selected_tiers, is_undergroung_m
 
 
 # Statistics window remains unchanged from before
-def draw_statistics_ui(screen, font, ui_height, grid, above_ground_level, underground_level, grid_size):
+def draw_statistics_ui(screen, font, ui_height, above_ground_level, underground_level, grid_size):
     width, height = screen.get_size()
 
     # Create a semi-transparent overlay for the statistics window
@@ -150,17 +150,18 @@ def draw_statistics_ui(screen, font, ui_height, grid, above_ground_level, underg
     loan_text = font.render("Loan: None", True, (255, 255, 255))  # Placeholder for future loan system
 
     # Power and Water statistics from needs.py
-    total_power_gen = get_total_power_generation(grid)
+    total_power_gen = get_total_power_generation(above_ground_level)  # Use above ground layer
     total_power_need = get_total_power_needs(above_ground_level, underground_level, grid_size)
     power_text = font.render(f"Power: Generated = {total_power_gen}, Needed = {total_power_need}", True, (255, 255, 255))
 
-    total_water_gen = get_total_water_generation(grid)
+    total_water_gen = get_total_water_generation(above_ground_level)  # Use above ground layer
     total_water_need = get_total_water_needs(above_ground_level, underground_level, grid_size)
     water_text = font.render(f"Water: Generated = {total_water_gen}, Needed = {total_water_need}", True, (255, 255, 255))
 
     # Operating costs calculation
-    power_costs = sum(power_operating_costs[tier] for row in grid for zone_type, tier in row if zone_type == 4)
-    water_costs = sum(water_operating_costs[tier] for row in grid for zone_type, tier in row if zone_type == 5)
+    power_costs = sum(power_operating_costs.get(tier, 0) for row in above_ground_level for zone_type, tier in row if zone_type == 4)
+    water_costs = sum(water_operating_costs.get(tier, 0) for row in above_ground_level for zone_type, tier in row if zone_type == 5)
+
     costs_text = font.render(f"Operating Costs: Power = {power_costs}, Water = {water_costs}", True, (255, 255, 255))
 
     # Warning icon if insufficient power or water

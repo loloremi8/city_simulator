@@ -117,13 +117,13 @@ def pay_for_zone(zone_type, tier=None):
 
 
 # Generate income for Residential and Industrial zones (money and resources)
-def generate_income(grid):
+def generate_income(above_ground_level):
     money = get_player_money()
     resources = get_player_resources()
     total_power_gen = 0
     total_water_gen = 0
 
-    # Define a helper function for operational cost deduction
+    # Helper function for operational cost deduction
     def deduct_cost(zone_type, tier, money):
         if zone_type == 4:  # Power zone
             cost = power_operating_costs.get(tier, 0)
@@ -133,16 +133,16 @@ def generate_income(grid):
             money -= cost
         return money
 
-    # Loop through grid and process income and costs
-    for row in grid:
+    # Loop through the above_ground_level and calculate income
+    for row in above_ground_level:
         for zone_type, tier in row:
             if zone_type in [1, 2]:  # Residential or Industrial zones
                 money += zone_income[zone_type][tier]["money"]
                 resources += zone_income[zone_type][tier]["resources"]
             elif zone_type == 4:  # Power zone
-                total_power_gen += zone_income[zone_type][tier]["generation"]  # Corrected to 'generation'
+                total_power_gen += zone_income[zone_type][tier]["generation"]
             elif zone_type == 5:  # Water zone
-                total_water_gen += zone_income[zone_type][tier]["generation"]  # Corrected to 'generation'
+                total_water_gen += zone_income[zone_type][tier]["generation"]
 
             # Deduct operational cost for power/water zones
             if zone_type in [4, 5]:
@@ -157,10 +157,10 @@ def generate_income(grid):
 
 
 # Function to deduct operational costs for power and water zones
-def deduct_operational_costs(grid):
+def deduct_operational_costs(above_ground_level):
     money = get_player_money()  # Get current money
 
-    for row in grid:
+    for row in above_ground_level:
         for zone_type, tier in row:
             # Handle operational costs for power plants
             if zone_type == 4:  # Power zone
@@ -178,9 +178,9 @@ def deduct_operational_costs(grid):
 
 
 # Calculate total money income from the grid
-def get_money_income(grid):
+def get_money_income(above_ground_level):
     total_income = 0
-    for row in grid:
+    for row in above_ground_level:
         for zone_type, tier in row:
             if zone_type in zone_income:
                 # Only count Residential and Industrial zones for money income
@@ -189,9 +189,9 @@ def get_money_income(grid):
     return total_income
 
 # Calculate total resource income from the grid
-def get_resource_income(grid):
+def get_resource_income(above_ground_level):
     total_resources_income = 0
-    for row in grid:
+    for row in above_ground_level:
         for zone_type, tier in row:
             if zone_type in zone_income:
                 # Only count Residential and Industrial zones for resource income
