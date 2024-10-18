@@ -1,5 +1,5 @@
 import pygame
-from grid import is_zone_connected
+from connectivity import is_zone_connected
 from economy import get_money_income, get_resource_income, format_number
 from needs import get_total_power_generation, get_total_water_generation, get_total_power_needs, get_total_water_needs, water_operating_costs, power_operating_costs
 
@@ -68,30 +68,37 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, ui_he
     pipe_line_text = font.render(f"P", True, (0, 0, 255) if selected_zone == 7 else (255, 255, 255))  # Blue "P" if pipe lines are selected
     screen.blit(pipe_line_text, (start_x + 970 + 40 + 5, 10))  # Show pipe line text
 
-    # Check if production meets demand, display warning icon if not
+    # Check if total generation meets total needs (resource shortage check)
     total_power_gen = get_total_power_generation(above_ground_level)  # Use above ground layer for power plants
     total_power_need = get_total_power_needs(above_ground_level, underground_level, grid_size)
     total_water_gen = get_total_water_generation(above_ground_level)  # Use above ground layer for water plants
     total_water_need = get_total_water_needs(above_ground_level, underground_level, grid_size)
 
+    # Display warnings if there's a resource shortage (generation < needs)
     if total_power_gen < total_power_need:
         draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power shortage
+        print(f"Power generation shortfall: {total_power_gen} generated, {total_power_need} needed")
+
     if total_water_gen < total_water_need:
         draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water shortage
+        print(f"Water generation shortfall: {total_water_gen} generated, {total_water_need} needed")
 
-    # Check for connection status for power and water, and display warnings
+    # Check for connection status for each zone (whether they are connected to power and water)
     for row in range(grid_size):
         for col in range(grid_size):
             zone_type, tier = above_ground_level[row][col]
             if zone_type == 1 or zone_type == 2:  # Residential or Industrial zones
-                connected_to_power = is_zone_connected(above_ground_level, underground_level, row, col, 'power')
-                connected_to_water = is_zone_connected(above_ground_level, underground_level, row, col, 'water')
+                connected_to_power = is_zone_connected(above_ground_level, underground_level, row, col, 'power', grid_size)
+                connected_to_water = is_zone_connected(above_ground_level, underground_level, row, col, 'water', grid_size)
 
                 # Show warning icons if not connected to power or water
                 if not connected_to_power:
-                    draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power shortage
+                    draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power connection issue
+                    print(f"Zone at ({row}, {col}) is NOT connected to power")
+            
                 if not connected_to_water:
-                    draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water shortage
+                    draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water connection issue
+                    print(f"Zone at ({row}, {col}) is NOT connected to water")
 
 
 

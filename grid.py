@@ -39,23 +39,6 @@ def place_zone(above_ground_level, pos, selected_zone, selected_tier, cell_size,
 
 
 
-# Range system: Define how far power plants and water plants can reach
-POWER_RANGE = 4  # Example: 4 tiles in all directions
-WATER_RANGE = 4  # Example: 4 tiles in all directions
-
-# Helper function to check if a zone is within range of power/water
-def is_zone_connected(above_ground_level, underground_level, row, col, zone_type):
-    for r in range(max(0, row - POWER_RANGE), min(grid_size, row + POWER_RANGE + 1)):
-        for c in range(max(0, col - POWER_RANGE), min(grid_size, col + POWER_RANGE + 1)):
-            # Check for power/water zone or lines/pipes
-            if zone_type == 'power' and (underground_level[r][c] == 'power_line' or above_ground_level[r][c][0] == 4):
-                return True
-            if zone_type == 'water' and (underground_level[r][c] == 'water_pipe' or above_ground_level[r][c][0] == 5):
-                return True
-    return False
-
-
-
 # Place infrastructure (pipes/power lines) in the underground layer
 def place_infrastructure(underground_level, pos, infrastructure_type, cell_size, ui_height, offset_x, offset_y):
     # Adjust click position by subtracting the offsets

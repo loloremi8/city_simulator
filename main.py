@@ -1,6 +1,7 @@
 import pygame
 import json
-from grid import initialize_grid, place_zone, draw_grid, place_infrastructure, draw_infrastructure, is_zone_connected, colours, colours_transparent
+from grid import initialize_grid, place_zone, draw_grid, place_infrastructure, draw_infrastructure, colours, colours_transparent
+from connectivity import is_water_connected, is_power_connected
 from economy import get_player_money, get_player_resources, set_player_money, set_player_resources, generate_income, deduct_operational_costs
 from ui import draw_ui, draw_statistics_ui, handle_zone_selection
 
@@ -142,8 +143,8 @@ while running:
         for col in range(grid_size):
             zone_type, tier = above_ground_level[row][col]
             if zone_type == 1 or zone_type == 2:  # Residential or Industrial
-                connected_to_power = is_zone_connected(above_ground_level, underground_level, row, col, 'power')
-                connected_to_water = is_zone_connected(above_ground_level, underground_level, row, col, 'water')
+                connected_to_power = is_power_connected(above_ground_level, underground_level, row, col, grid_size)
+                connected_to_water = is_water_connected(above_ground_level, underground_level, row, col, grid_size)
                 if not connected_to_power:
                     print(f"Zone at ({row}, {col}) not connected to power!")
                 if not connected_to_water:
@@ -200,6 +201,6 @@ while running:
 
     # Update the display
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(15)
 
 pygame.quit()
