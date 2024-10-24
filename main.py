@@ -3,7 +3,8 @@ import json
 from grid import initialize_grid, place_zone, draw_grid, place_infrastructure, draw_infrastructure, colours, colours_transparent
 from connectivity import is_water_connected, is_power_connected
 from economy import get_player_money, get_player_resources, set_player_money, set_player_resources, generate_income, deduct_operational_costs
-from ui import draw_ui, draw_statistics_ui, handle_zone_selection
+from ui import draw_ui, draw_statistics_ui, handle_zone_selection, draw_bank_menu
+from bank import take_loan, repay_loan
 
 
 
@@ -35,7 +36,7 @@ pygame.init()
 
 # Basic window settings
 window_width, window_height = 1366, 705
-ui_height = 50
+ui_height = 80
 screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE, pygame.SRCALPHA)
 
 # Initialze the clock
@@ -78,6 +79,13 @@ income_timer = pygame.time.get_ticks()
 show_statistics = False
 
 is_underground_mode = False  # Flag to track whether underground mode is active
+
+# Add a flag to track if any menu (statistics, bank, etc.) is open
+show_bank = False  # Set to True when any menu is active (e.g., statistics or bank)
+
+# Loan repayment time
+repayment_interval = 6000  # Repayment every 5 seconds
+repayment_timer = pygame.time.get_ticks()
 
 
 
@@ -138,6 +146,18 @@ while running:
             elif event.key == pygame.K_t:  # Toggle statistics window with 'T' key
                 show_statistics = not show_statistics
 
+            elif event.key == pygame.K_b:  # Toggle bank menu with 'B' key
+                show_bank = not show_bank  # Toggle the bank menu
+
+            # Handle loan-taking keys if the bank menu is open
+            if show_bank:
+                if event.key == pygame.K_8:
+                    take_loan("small_loan")
+                elif event.key == pygame.K_9:
+                    take_loan("medium_loan")
+                elif event.key == pygame.K_0:
+                    take_loan("large_loan")
+
     # Range check for power and water
     for row in range(grid_size):
         for col in range(grid_size):
@@ -175,6 +195,11 @@ while running:
         deduct_operational_costs(above_ground_level)
         deduction_timer = current_time
 
+    # Check if it's time to repay the loan
+    if current_time - repayment_timer >= repayment_interval:
+        repay_loan()
+        repayment_timer = current_time
+        
     # Get current window size
     window_width, window_height = pygame.display.get_surface().get_size()
 
@@ -191,7 +216,6 @@ while running:
         # Draw the normal above-ground layer
         draw_grid(screen, above_ground_level, cell_size, ui_height, offset_x, offset_y, colours)
 
-
     # Draw the main UI using the correct grids
     draw_ui(screen, get_player_money(), get_player_resources(), selected_zone, selected_tiers, font, ui_height, above_ground_level, underground_level, grid_size)
 
@@ -199,8 +223,12 @@ while running:
     if show_statistics:
         draw_statistics_ui(screen, font, ui_height, above_ground_level, underground_level, grid_size)
 
+    # Draw the bank menu if it's active
+    if show_bank:
+        draw_bank_menu(screen, font, ui_height)
+
     # Update the display
     pygame.display.flip()
-    clock.tick(15)
+    clock.tick(60)
 
 pygame.quit()

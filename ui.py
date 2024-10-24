@@ -1,7 +1,8 @@
 import pygame
 from connectivity import is_zone_connected
-from economy import get_money_income, get_resource_income, format_number
+from economy import get_money_income, get_resource_income, format_number, get_dynamic_zone_price
 from needs import get_total_power_generation, get_total_water_generation, get_total_power_needs, get_total_water_needs, water_operating_costs, power_operating_costs
+from bank import get_loan_status
 
 
 
@@ -68,6 +69,13 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, ui_he
     pipe_line_text = font.render(f"P", True, (0, 0, 255) if selected_zone == 7 else (255, 255, 255))  # Blue "P" if pipe lines are selected
     screen.blit(pipe_line_text, (start_x + 970 + 40 + 5, 10))  # Show pipe line text
 
+    # Get dynamic price for the selected zone and tier
+    dynamic_money_cost, resource_cost = get_dynamic_zone_price(selected_zone, selected_tiers[selected_zone - 1])
+    # Display the cost in the middle underneath the zone icons
+    cost_text = font.render(f"Cost: {dynamic_money_cost} money, {resource_cost} resources", True, (255, 255, 255))
+    # Display the cost text
+    screen.blit(cost_text, (500, 50))
+
     # Check if total generation meets total needs (resource shortage check)
     total_power_gen = get_total_power_generation(above_ground_level)  # Use above ground layer for power plants
     total_power_need = get_total_power_needs(above_ground_level, underground_level, grid_size)
@@ -77,11 +85,11 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, ui_he
     # Display warnings if there's a resource shortage (generation < needs)
     if total_power_gen < total_power_need:
         draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power shortage
-        print(f"Power generation shortfall: {total_power_gen} generated, {total_power_need} needed")
+        # print(f"Power generation shortfall: {total_power_gen} generated, {total_power_need} needed") # Debuging
 
     if total_water_gen < total_water_need:
         draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water shortage
-        print(f"Water generation shortfall: {total_water_gen} generated, {total_water_need} needed")
+        # print(f"Water generation shortfall: {total_water_gen} generated, {total_water_need} needed") # Debuging
 
     # Check for connection status for each zone (whether they are connected to power and water)
     for row in range(grid_size):
@@ -94,11 +102,11 @@ def draw_ui(screen, money, resources, selected_zone, selected_tiers, font, ui_he
                 # Show warning icons if not connected to power or water
                 if not connected_to_power:
                     draw_icon(screen, "icons/warning.png", start_x + 690 + 20, 6)  # Warning icon for power connection issue
-                    print(f"Zone at ({row}, {col}) is NOT connected to power")
-            
+                    # print(f"Zone at ({row}, {col}) is NOT connected to power") # Debuging
+
                 if not connected_to_water:
                     draw_icon(screen, "icons/warning.png", start_x + 780 + 20, 6)  # Warning icon for water connection issue
-                    print(f"Zone at ({row}, {col}) is NOT connected to water")
+                    # print(f"Zone at ({row}, {col}) is NOT connected to water") # Debuging
 
 
 
@@ -154,7 +162,10 @@ def draw_statistics_ui(screen, font, ui_height, above_ground_level, underground_
     title_text = font.render("Economy & Statistics", True, (255, 255, 255))
     tax_text = font.render("Tax Rate: 15%", True, (255, 255, 255))  # Placeholder for future tax system
     pop_text = font.render("Population: 1,500", True, (255, 255, 255))  # Placeholder for future population system
-    loan_text = font.render("Loan: None", True, (255, 255, 255))  # Placeholder for future loan system
+
+    # Update loan status using the bank system
+    loan_status = get_loan_status()  # This function is from bank.py
+    loan_text = font.render(loan_status, True, (255, 255, 255))
 
     # Power and Water statistics from needs.py
     total_power_gen = get_total_power_generation(above_ground_level)  # Use above ground layer
@@ -183,3 +194,32 @@ def draw_statistics_ui(screen, font, ui_height, above_ground_level, underground_
     screen.blit(power_text, (50, ui_height + 250))  # Power statistics
     screen.blit(water_text, (50, ui_height + 300))  # Water statistics
     screen.blit(costs_text, (50, ui_height + 350))  # Operating costs
+
+
+
+# Draw the bank menu
+def draw_bank_menu(screen, font, ui_height):
+    width, height = screen.get_size()
+
+    # Create a semi-transparent overlay for the statistics window
+    stats_background = pygame.Surface((width, height - ui_height))
+    stats_background.set_alpha(200)  # Semi-transparent
+    stats_background.fill((30, 30, 30))  # Dark gray background
+    screen.blit(stats_background, (0, ui_height))
+
+    # Display available loans
+    small_loan_text = font.render("Small Loan: $1000, 5% interest, 10 cycles", True, (255, 255, 255))
+    medium_loan_text = font.render("Medium Loan: $5000, 3% interest, 20 cycles", True, (255, 255, 255))
+    large_loan_text = font.render("Large Loan: $10000, 2% interest, 30 cycles", True, (255, 255, 255))
+    
+    screen.blit(small_loan_text, (100, 100))
+    screen.blit(medium_loan_text, (100, 150))
+    screen.blit(large_loan_text, (100, 200))
+
+    # Display active loan status
+    loan_status_text = font.render(get_loan_status(), True, (255, 255, 255))
+    screen.blit(loan_status_text, (100, 250))
+
+    # Placeholder: Add buttons or keypress events to handle taking loans
+    instruction_text = font.render("Press 8 for Small Loan, 9 for Medium Loan, 0 for Large Loan", True, (255, 255, 255))
+    screen.blit(instruction_text, (100, 300))

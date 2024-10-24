@@ -89,30 +89,90 @@ zone_income = {
     }
 }
 
+zones_placed = {
+    1: 0,  # Residential Zones placed
+    2: 0,  # Industrial Zones placed
+    3: 0,  # Roads placed
+    4: 0,  # Power plants placed
+    5: 0,  # Water plants placed
+    6: 0,  # Power lines placed
+    7: 0,  # Water lines placed
+}
+
+inflation_rate = 0.05  # 5% cost increase per zone placed
+
+
+
+def get_dynamic_zone_cost(zone_type, tier=None):
+    # Get the base costs of the zone (money and resources)
+    if zone_type in infrastructure_costs:
+        base_money_cost = infrastructure_costs[zone_type]["money"]  # Infrastructure only has money cost
+        base_resource_cost = infrastructure_costs[zone_type]["resources"]
+    else:
+        base_money_cost = zone_costs[zone_type][tier]["money"]
+        base_resource_cost = zone_costs[zone_type][tier]["resources"]
+    
+    # Calculate the inflation factor based on how many zones of this type have been placed
+    inflation_factor = 1 + (inflation_rate * zones_placed.get(zone_type, 0))
+    
+    # Apply inflation to both money and resource costs
+    dynamic_money_cost = int(base_money_cost * inflation_factor)
+    dynamic_resource_cost = int(base_resource_cost * inflation_factor)
+    
+    return dynamic_money_cost, dynamic_resource_cost
+
+
+
+def get_dynamic_zone_price(zone_type, tier=None):
+    # Get dynamic money and resource costs based on inflation
+    dynamic_money_cost, dynamic_resource_cost = get_dynamic_zone_cost(zone_type, tier)
+
+    # Get resource cost
+    if zone_type in infrastructure_costs:
+        resource_cost = infrastructure_costs[zone_type]["resources"]
+    else:
+        resource_cost = zone_costs[zone_type][tier]["resources"]
+
+    return dynamic_money_cost, dynamic_resource_cost
+
 
 
 # Function to check if the player can afford a zone of a specific tier
 def can_afford_zone(zone_type, tier=None):
-    # Check if it's a zone or infrastructure
-    if zone_type in infrastructure_costs:  # Infrastructure
-        cost = infrastructure_costs[zone_type]
-    else:  # Zones
-        cost = zone_costs[zone_type][tier]
+    # Get dynamic costs based on inflation (money and resources)
+    dynamic_money_cost, dynamic_resource_cost = get_dynamic_zone_cost(zone_type, tier)
+
+    # Check if it's a zone or infrastructure for resources
+    if zone_type in infrastructure_costs:
+        resource_cost = infrastructure_costs[zone_type]["resources"]
+    else:
+        resource_cost = zone_costs[zone_type][tier]["resources"]
     
-    return get_player_money() >= cost["money"] and get_player_resources() >= cost["resources"]
+    # Check if the player has enough money and resources
+    return get_player_money() >= dynamic_money_cost and get_player_resources() >= dynamic_resource_cost
 
 
 
 # Deduct the cost of the zone
 def pay_for_zone(zone_type, tier=None):
-    # Check if it's a zone or infrastructure
-    if zone_type in infrastructure_costs:  # Infrastructure
-        cost = infrastructure_costs[zone_type]
-    else:  # Zones
-        cost = zone_costs[zone_type][tier]
+    # Get dynamic costs based on inflation (money and resources)
+    dynamic_money_cost, dynamic_resource_cost = get_dynamic_zone_cost(zone_type, tier)
     
-    set_player_money(get_player_money() - cost["money"])
-    set_player_resources(get_player_resources() - cost["resources"])
+    # Deduct money from the player
+    set_player_money(get_player_money() - dynamic_money_cost)
+    # Deduct resources from the player
+    set_player_resources(get_player_resources() - dynamic_resource_cost)
+
+    # Deduct resources
+    if zone_type in infrastructure_costs:
+        resource_cost = infrastructure_costs[zone_type]["resources"]
+    else:
+        resource_cost = zone_costs[zone_type][tier]["resources"]
+    set_player_resources(get_player_resources() - resource_cost)
+
+    # Increment the number of zones placed for inflation tracking
+    if zone_type in zones_placed:
+        zones_placed[zone_type] += 1
 
 
 

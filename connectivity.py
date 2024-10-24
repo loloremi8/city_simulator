@@ -80,14 +80,14 @@ def is_power_connected(above_ground_level, underground_level, row, col, grid_siz
     for r in range(max(0, row - POWER_RANGE), min(grid_size, row + POWER_RANGE + 1)):
         for c in range(max(0, col - POWER_RANGE), min(grid_size, col + POWER_RANGE + 1)):
             if underground_level[r][c] == 'power_line':
-                print(f"Power line found at ({r}, {c}) near house at ({row}, {col})")
+                print(f"Power line found at ({r}, {c}) near house at ({row}, {col})") # Debuging
             if above_ground_level[r][c][0] == 4:  # Power plant
-                print(f"Power plant found at ({r}, {c}) near house at ({row}, {col})")
+                print(f"Power plant found at ({r}, {c}) near house at ({row}, {col})") # Debuging
             
             if underground_level[r][c] == 'power_line' or above_ground_level[r][c][0] == 4:
                 return True
 
-    print(f"House at ({row}, {col}) is NOT connected to power")
+    print(f"House at ({row}, {col}) is NOT connected to power") # Debuging
     return False
 
 
@@ -106,10 +106,10 @@ def is_water_connected(above_ground_level, underground_level, row, col, grid_siz
     for pipe_row, pipe_col in connected_pipes:
         distance = abs(pipe_row - row) + abs(pipe_col - col)
         if distance <= WATER_RANGE:
-            print(f"House at ({row}, {col}) is connected to water through pipe at ({pipe_row}, {pipe_col})")
+            print(f"House at ({row}, {col}) is connected to water through pipe at ({pipe_row}, {pipe_col})") # Debuging
             return True
 
-    print(f"House at ({row}, {col}) is NOT connected to water")
+    print(f"House at ({row}, {col}) is NOT connected to water") # Debuging
     return False
 
 
