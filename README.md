@@ -33,9 +33,13 @@ Now working on: Re-work the economy system (balance prices/costs to make it play
 
 T - Opens/Closes statistic menu.
 
+B - Opens/Closes bank menu.
+
 S/L - Save/Load the game file.
 
 1/2/3/4/5/6/7 - Chooses zones (Residential/Industrail/Road/Power/Water/Power lines/Water pipes).
+
+8/9/0 - Chooses loans.
 
 Arrow keys Up/Down - Chooses tiers of zones (Only for Residential/Industial/Power/Water).
 
@@ -47,7 +51,15 @@ RMB while holding and dragging - moving the map.
 
 MBW - Zoom on the map.
 
-**Zone costs:**
+**Costs:**
+
+*Loans*
+
+Small loan: Amount: 1000, Interest rate: 0.05, Duration: 10,
+
+Medium loan: Amount: 5000, Interest rate: 0.03, Duration: 20,
+
+Large loan: Amount: 10000, Interest rate: 0.02, Duration: 30.
 
 *Residential Zone*
 
