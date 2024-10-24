@@ -50,7 +50,7 @@ deduction_timer = pygame.time.get_ticks()
 deduction_interval = 8000  # 8 seconds
 
 # Game initialization
-grid_size = 50  # Map is 150x150 now
+grid_size = 150  # Map is 150x150 now
 above_ground_level, underground_level = initialize_grid(grid_size) # Initialize both layers
 grid = above_ground_level
 

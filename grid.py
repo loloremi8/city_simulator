@@ -3,7 +3,7 @@ from economy import can_afford_zone, pay_for_zone, infrastructure_costs
 
 
 
-grid_size = 50  # Grid size (150x150)
+grid_size = 150  # Grid size (150x150)
 
 # Initialize a double-layer grid system
 def initialize_grid(grid_size):
